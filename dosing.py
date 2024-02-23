@@ -157,11 +157,26 @@ if  added_N_with_KNO3 > updated_delta_nitrogen:
     updated_delta_potassium = round(updated_delta_potassium - added_K_with_KNO3, TWO_DECIMAL)
     print("K to be added with KNO3:", added_K_with_KNO3, "mg")
     print("\ndelta K after substracting KNO3:", updated_delta_potassium, "mg")
-    print("N to be added with Mg2NO3:", added_N_with_Mg2NO3, "mg")
-    updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_KNO3, TWO_DECIMAL)
-    print("delta N after substracting KNO3:", updated_delta_nitrogen, "mg")
+    # print("N to be added with Mg2NO3:", added_N_with_Mg2NO3, "mg")
+    
 
 else:   
     print("Sufficient KNO3 levels and add now mg2no3")
+
+
+if added_N_with_KNO3 > updated_delta_nitrogen:
+    updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_KNO3, TWO_DECIMAL)
+    print("delta N after substracting KNO3:", updated_delta_nitrogen, "mg")
+    reduced_K_from_KNO3 = round(updated_delta_nitrogen * potassium_nitrate_KNNO3, TWO_DECIMAL)
+    print("K to be reduced from KNO3:", reduced_K_from_KNO3, "mg")
+    updated_delta_potassium = round(updated_delta_potassium + reduced_K_from_KNO3, TWO_DECIMAL)
+    print("\ndelta K after reducing KNO3:", updated_delta_potassium, "mg")
+    print("N requirement complete")
+    # add K2SO4 to cover K Delta
+    added_K_with_K2SO4 = round(ratio_calculation(updated_delta_potassium,potassium_sulphate_KSSO4), TWO_DECIMAL)
+
+else:
+    print("TODO")
+
 
 # if  added_N_with_Mg2NO3 > updated_delta_nitrogen
