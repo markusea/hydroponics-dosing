@@ -122,6 +122,7 @@ added_K_with_MKP = round(required_P * mkp_KPPO4, TWO_DECIMAL)
 updated_delta_potassium = initial_delta_potassium - added_K_with_MKP
 required_Mg = round(mg_p_dosing(magni_ppm), TWO_DECIMAL)
 added_N_with_Mg2NO3 = round(required_Mg * mg_nitrate_NNO3Mg, TWO_DECIMAL)
+
 print("\nP Dosing:", updated_delta_potassium, required_P, "mg")
 print("Mg Dosing:", round(mg_p_dosing(magni_ppm), TWO_DECIMAL), "mg")
 #print("Mg Dosing:", round(mg_p_dosing2(magni_ppm, 5.3, mg_nitrate_no3_ratio), 3), "ml")
@@ -129,7 +130,7 @@ print("Mg Dosing:", round(mg_p_dosing(magni_ppm), TWO_DECIMAL), "mg")
 # print("N in KNO3 Dosing:", round(mg_p_dosing(potassium_ppm,potassium_nitrate_No3_ratio), 3), "ml")
 # print("S in K2SO4 Dosing:", round(mg_p_dosing(sulphur_ppm,potassium_sulphate_so4_ratio), 3), "ml")
 
-# Add an if else statement to check delta_calcium
+# tree branch where Ca required > 0 is checked
 if initial_delta_calcium > 0:
     print("\nAdd CaNO3:", initial_delta_calcium, "mg")
     added_N_with_CaNO3 = round(ratio_calculation(initial_delta_calcium, calcium_nitrate_Ca_NNo3), TWO_DECIMAL)
@@ -140,6 +141,8 @@ if initial_delta_calcium > 0:
 else:
     print("Sufficient Ca levels")
 
+
+# tree branch where K required > K injected is checked
 if initial_delta_potassium > added_K_with_MKP:
     print("\nTo be added KNO3:", updated_delta_potassium, "mg")
     # calculte added ratio of N
@@ -149,34 +152,48 @@ if initial_delta_potassium > added_K_with_MKP:
     # print("delta N with KNO3:", updated_delta_nitrogen)
 
 else:
+    """""
+    TODO: K required < K injected case
+
+    """""
     print("Add MG2NO3 TODO")
 
-
+# tree branch where NO3 injected > NO3 required is checked
 if  added_N_with_KNO3 > updated_delta_nitrogen:
+    
+    """""
+    TODO: not needed at initial look following code shall be removed --->
+
     added_K_with_KNO3 = round(ratio_calculation(updated_delta_nitrogen,potassium_nitrate_KNNO3), TWO_DECIMAL)
-    updated_delta_potassium = round(updated_delta_potassium - added_K_with_KNO3, TWO_DECIMAL)
     print("K to be added with KNO3:", added_K_with_KNO3, "mg")
+    updated_delta_potassium = round(updated_delta_potassium - added_K_with_KNO3, TWO_DECIMAL)
     print("\ndelta K after substracting KNO3:", updated_delta_potassium, "mg")
+    """""
     # print("N to be added with Mg2NO3:", added_N_with_Mg2NO3, "mg")
     
+    updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_KNO3, TWO_DECIMAL) # N required - NNO3
+    print("delta N after substracting KNO3:", updated_delta_nitrogen, "mg")
+    reduced_K = round(updated_delta_nitrogen * potassium_nitrate_KNNO3, TWO_DECIMAL) # to know how much K is added with N from previous step
+    print("K required to be reduced:", reduced_K, "mg")
+    updated_delta_potassium = round(updated_delta_potassium + reduced_K, TWO_DECIMAL)
+    print("\nK2SO4 injection since N required = N injected:", updated_delta_potassium, "mg")
+    print("K2SO4 injection:", round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL), "ml")
+
+    """""
+    TODO: add how much S is added as well but need MgSO4 ratio
+    """""
+
+    # add K2SO4 to cover K Delta
+    added_K_with_K2SO4 = round(ratio_calculation(updated_delta_potassium,potassium_sulphate_KSSO4), TWO_DECIMAL)
 
 else:   
     print("Sufficient KNO3 levels and add now mg2no3")
 
 
-if added_N_with_KNO3 > updated_delta_nitrogen:
-    updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_KNO3, TWO_DECIMAL)
-    print("delta N after substracting KNO3:", updated_delta_nitrogen, "mg")
-    reduced_K_from_KNO3 = round(updated_delta_nitrogen * potassium_nitrate_KNNO3, TWO_DECIMAL)
-    print("K to be reduced from KNO3:", reduced_K_from_KNO3, "mg")
-    updated_delta_potassium = round(updated_delta_potassium + reduced_K_from_KNO3, TWO_DECIMAL)
-    print("\ndelta K after reducing KNO3:", updated_delta_potassium, "mg")
-    print("N requirement complete")
-    # add K2SO4 to cover K Delta
-    added_K_with_K2SO4 = round(ratio_calculation(updated_delta_potassium,potassium_sulphate_KSSO4), TWO_DECIMAL)
-
-else:
-    print("TODO")
 
 
-# if  added_N_with_Mg2NO3 > updated_delta_nitrogen
+# tree branch where N injected > NO3 required is checked
+if  updated_delta_nitrogen < 0:
+    # add MgSO4
+    
+    print("\nMgSO4 injection:", round(required_Mg * 2.11, TWO_DECIMAL), "mg") # fake to be corrected after getting orignal ratio
