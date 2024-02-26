@@ -19,9 +19,9 @@ potassium_nitrate_KNNO3 = 2.78
 mg_nitrate_NNO3Mg = 1.11
 potassium_sulphate_KSSO4 = 2.26
 
-# Define variables for measured PPM values
-nitrogen_measured_ppm = 203
-potassium_measured_ppm = 196
+# Define variables for measured PPM values Dummy Values
+nitrogen_measured_ppm = 225 #203
+potassium_measured_ppm = 310 #196
 calcium_measured_ppm = 200
 sulphur_measured_ppm = 50
 
@@ -87,11 +87,12 @@ updated_delta_calcium = initial_delta_calcium = round(calculate_Deltaion(calcium
 updated_delta_potassium = initial_delta_potassium = round(calculate_Deltaion(potassium_ppm, potassium_measured_ppm, vol_current, potassium_source_ppm, vol_target), TWO_DECIMAL)
 initial_delta_sulphur = round(calculate_Deltaion(sulphur_ppm, sulphur_measured_ppm, vol_current, sulphur_source_ppm, vol_target), TWO_DECIMAL)
 
-# delta values for specific nutrients in ml
-# delta_nitrogen_ml =  round((delta_nitrogen/10000) * 1000, TWO_DECIMAL)
-# delta_calcium_ml = round((delta_calcium/10000) * 1000, TWO_DECIMAL)
-# delta_potassium_ml = round((delta_potassium/10000) * 1000, TWO_DECIMAL)
-# delta_sulphur_ml = round((delta_sulphur/10000) * 1000, TWO_DECIMAL)
+#  values for specific nutrients in ml
+mKP_ml =  0
+caNO3_ml = 0
+kNO3_ml = 0
+mgNO3_ml = 0
+k2SO4_ml = 0
 
 print("Delta Nitrogen:", initial_delta_nitrogen, "mg")
 print("Delta Calcium:", initial_delta_calcium, "mg")
@@ -103,7 +104,7 @@ print("Delta Sulphur:", initial_delta_sulphur, "mg\n")
 # print("Sulphur injection ml:", delta_sulphur_ml, "ml\n")
 print("NO3H38%:", percentage_no3h38, "ml")
 print("N in NO3H38%:", percentage_no3h38 * 84, "mg")
-updated_delta_nitrogen = initial_delta_nitrogen - percentage_no3h38 * 84
+updated_delta_nitrogen = round(initial_delta_nitrogen - percentage_no3h38 * 84, TWO_DECIMAL)
 print("Delta N after substarcting NO3H38%:", updated_delta_nitrogen, "mg")
 
 # Function to calculate milligrams per part dosing
@@ -116,80 +117,80 @@ def ratio_calculation(delta, ratio):
     specific_ion_part = delta/ratio
     return specific_ion_part
 
+# Function to calculate micro nutrients
+def micro_nuterients(ratio):
+    micro_concentration = ratio/(initial_delta_nitrogen + initial_delta_calcium + initial_delta_potassium)
+
 # Finding P and Mg required here
 required_P = round(mg_p_dosing(phosphor_ppm), TWO_DECIMAL)
-added_K_with_MKP = round(required_P * mkp_KPPO4, TWO_DECIMAL)
-updated_delta_potassium = initial_delta_potassium - added_K_with_MKP
+added_K_with_MKP = round(required_P * mkp_KPPO4, TWO_DECIMAL) # TODO change the ratio as im Mg approach if correct.
+updated_delta_potassium = round(initial_delta_potassium - added_K_with_MKP, TWO_DECIMAL)
 required_Mg = round(mg_p_dosing(magni_ppm), TWO_DECIMAL)
-added_N_with_Mg2NO3 = round(required_Mg * mg_nitrate_NNO3Mg, TWO_DECIMAL)
+# added_N_with_Mg2NO3 = round(required_Mg * mg_nitrate_NNO3Mg, TWO_DECIMAL)
 
-print("\nP Dosing:", updated_delta_potassium, required_P, "mg")
-print("Mg Dosing:", round(mg_p_dosing(magni_ppm), TWO_DECIMAL), "mg")
-#print("Mg Dosing:", round(mg_p_dosing2(magni_ppm, 5.3, mg_nitrate_no3_ratio), 3), "ml")
-# print("N in CaNO3 Dosing:", round(mg_p_dosing(calcium_ppm,calcium_nitrate_No3_ratio), 3), "ml")
-# print("N in KNO3 Dosing:", round(mg_p_dosing(potassium_ppm,potassium_nitrate_No3_ratio), 3), "ml")
-# print("S in K2SO4 Dosing:", round(mg_p_dosing(sulphur_ppm,potassium_sulphate_so4_ratio), 3), "ml")
+
+
 
 # tree branch where Ca required > 0 is checked
 if initial_delta_calcium > 0:
-    print("\nAdd CaNO3:", initial_delta_calcium, "mg")
+    caNO3_ml = round((initial_delta_calcium/10000) * 1000, TWO_DECIMAL)
+    print("\nTo be added CaNO3:", initial_delta_calcium, "mg and solution to pump", caNO3_ml, "ml")
     added_N_with_CaNO3 = round(ratio_calculation(initial_delta_calcium, calcium_nitrate_Ca_NNo3), TWO_DECIMAL)
     # print("Add MKP/KH2PO4:", round(ratio_calculation(updated_delta_potassium, mkp_KPPO4), TWO_DECIMAL), "ml")
-    print("Add MKP/KH2PO4:", added_K_with_MKP, "mg")
-    updated_delta_nitrogen = updated_delta_nitrogen - added_N_with_CaNO3
-    print("delta N after substracting CaNO3:", updated_delta_nitrogen)
+    mKP_ml = round((added_K_with_MKP/10000) * 1000, TWO_DECIMAL)
+    print("\nP Dosing:", required_P, "mg")
+    print("To be added MKP/KH2PO4:", added_K_with_MKP, "mg and solution to pump", mKP_ml, "ml")
+    updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_CaNO3, TWO_DECIMAL)
+    print("Delta N after substracting CaNO3:", updated_delta_nitrogen, "mg")
 else:
     print("Sufficient Ca levels")
 
 
 # tree branch where K required > K injected is checked
 if initial_delta_potassium > added_K_with_MKP:
-    print("\nTo be added KNO3:", updated_delta_potassium, "mg")
+    kNO3_ml = round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL)
+    print("\nTo be added KNO3:", updated_delta_potassium, "mg and solution to pump", kNO3_ml, "ml")
     # calculte added ratio of N
     added_N_with_KNO3 = round(ratio_calculation(updated_delta_potassium,potassium_nitrate_KNNO3), TWO_DECIMAL)
-    print("N to be added with KNO3:", added_N_with_KNO3, "mg")
+    print("N in KNO3:", added_N_with_KNO3, "mg")
     # updated_delta_nitrogen = updated_delta_nitrogen - added_N_with_KNO3
     # print("delta N with KNO3:", updated_delta_nitrogen)
 
 else:
-    """""
-    TODO: K required < K injected case
-
-    """""
-    print("Add MG2NO3 TODO")
+    added_N_with_Mg2NO3 = round(required_Mg * 1.17, TWO_DECIMAL)
+    print("Mg Dosing:", required_Mg, "mg")
+    mgNO3_ml = round((added_N_with_Mg2NO3/10000) * 1000, TWO_DECIMAL)
+    print("To be added MG2NO3 =", added_N_with_Mg2NO3, "mg and solution to pump", mgNO3_ml, "ml")
+    updated_delta_nitrogen = updated_delta_nitrogen - added_N_with_Mg2NO3
+    print("Mg required complete. Updated delta N = ", updated_delta_nitrogen, "mg")
 
 # tree branch where NO3 injected > NO3 required is checked
 if  added_N_with_KNO3 > updated_delta_nitrogen:
-    
-    """""
-    TODO: not needed at initial look following code shall be removed --->
-
-    added_K_with_KNO3 = round(ratio_calculation(updated_delta_nitrogen,potassium_nitrate_KNNO3), TWO_DECIMAL)
-    print("K to be added with KNO3:", added_K_with_KNO3, "mg")
-    updated_delta_potassium = round(updated_delta_potassium - added_K_with_KNO3, TWO_DECIMAL)
-    print("\ndelta K after substracting KNO3:", updated_delta_potassium, "mg")
-    """""
-    # print("N to be added with Mg2NO3:", added_N_with_Mg2NO3, "mg")
-    
+        
     updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_KNO3, TWO_DECIMAL) # N required - NNO3
-    print("delta N after substracting KNO3:", updated_delta_nitrogen, "mg")
+    print("Delta N after substracting KNO3:", updated_delta_nitrogen, "mg")
     reduced_K = round(updated_delta_nitrogen * potassium_nitrate_KNNO3, TWO_DECIMAL) # to know how much K is added with N from previous step
     print("K required to be reduced:", reduced_K, "mg")
     updated_delta_potassium = round(updated_delta_potassium + reduced_K, TWO_DECIMAL)
     print("\nK2SO4 injection since N required = N injected:", updated_delta_potassium, "mg")
-    print("K2SO4 injection:", round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL), "ml")
+    k2SO4_ml = round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL)
+    print("K2SO4 injection:", k2SO4_ml, "ml")
 
     """""
     TODO: add how much S is added as well but need MgSO4 ratio
     """""
 
     # add K2SO4 to cover K Delta
-    added_K_with_K2SO4 = round(ratio_calculation(updated_delta_potassium,potassium_sulphate_KSSO4), TWO_DECIMAL)
+    # added_K_with_K2SO4 = round(ratio_calculation(updated_delta_potassium,potassium_sulphate_KSSO4), TWO_DECIMAL)
 
 else:   
-    print("Sufficient KNO3 levels and add now mg2no3")
-
-
+    print("\nSufficient KNO3 levels. Now add mg2no3")
+    print("Mg Dosing:", required_Mg, "mg")
+    added_N_with_Mg2NO3 = round(required_Mg * 1.17, TWO_DECIMAL)
+    updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_Mg2NO3, TWO_DECIMAL)
+    print("Mg required complete. Updated delta N =", updated_delta_nitrogen, "mg")
+    mgNO3_ml = round((added_N_with_Mg2NO3/10000) * 1000, TWO_DECIMAL)
+    print("To be added MG2NO3 =", added_N_with_Mg2NO3, "mg and solution to pump", mgNO3_ml, "ml")
 
 
 # tree branch where N injected > NO3 required is checked
@@ -197,3 +198,10 @@ if  updated_delta_nitrogen < 0:
     # add MgSO4
     
     print("\nMgSO4 injection:", round(required_Mg * 2.11, TWO_DECIMAL), "mg") # fake to be corrected after getting orignal ratio
+
+else:
+    # split MgNO3%, CaNO3%, KNO3% for remaining N
+    ten_percent = round(0.10 * updated_delta_nitrogen, TWO_DECIMAL)
+    forty_percent = round(0.40 * updated_delta_nitrogen, TWO_DECIMAL)
+    fifty_percent = round(0.50 * updated_delta_nitrogen, TWO_DECIMAL)
+    print("\nMgNO3%, CaNO3%, KNO3% to be added to fulfill N req", ten_percent, "mg", forty_percent, "mg", fifty_percent, "mg\n") # to be checked
