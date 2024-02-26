@@ -122,19 +122,19 @@ def ratio_calculation(delta, ratio):
     specific_ion_part = delta/ratio
     return specific_ion_part
 
-# Function to calculate micro and iron nutrients TODO implementation
+# Function to calculate micro and iron nutrients implementation
 def micro_nuterients(ratio):
     micro_concentration = ratio * (updated_delta_calcium + required_P + required_Mg + updated_delta_potassium + updated_delta_potassium + updated_delta_sulphur)
     return micro_concentration
 
-# Function to calculate nuterient solution TODO implementation
+# Function to calculate nuterient solution implementation
 def volume_NS():
     water_volume = (vol_target * 1000) - ((vol_current * 1000) + (mKP_ml + caNO3_ml + kNO3_ml + mgNO3_ml + k2SO4_ml + mgSO4_ml + iron_ml + micro_ml) + percentage_no3h38) # TODO add irom ml and micro ml as well
     return water_volume 
 
 # Finding P and Mg required here
 required_P = round(mg_p_dosing(phosphor_ppm), TWO_DECIMAL)
-added_K_with_MKP = round(required_P * mkp_KPPO4, TWO_DECIMAL) # TODO change the ratio as im Mg approach if correct.
+added_K_with_MKP = round(required_P * mkp_KPPO4, TWO_DECIMAL) 
 updated_delta_potassium = round(initial_delta_potassium - added_K_with_MKP, TWO_DECIMAL)
 required_Mg = round(mg_p_dosing(magni_ppm), TWO_DECIMAL)
 # added_N_with_Mg2NO3 = round(required_Mg * mg_nitrate_NNO3Mg, TWO_DECIMAL)
@@ -148,11 +148,12 @@ if initial_delta_calcium > 0:
     print("\nTo be added CaNO3:", initial_delta_calcium, "mg and solution to pump", caNO3_ml, "ml")
 
     added_N_with_CaNO3 = round(ratio_calculation(initial_delta_calcium, calcium_nitrate_Ca_NNo3), TWO_DECIMAL)
-    mKP_ml = round((added_K_with_MKP/10000) * 1000, TWO_DECIMAL)
+    updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_CaNO3, TWO_DECIMAL)
+    print("N in CaNO3:", added_N_with_CaNO3, "mg")
 
     print("\nP Dosing:", required_P, "mg")
+    mKP_ml = round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL)
     print("To be added MKP/KH2PO4:", added_K_with_MKP, "mg and solution to pump", mKP_ml, "ml")
-    updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_CaNO3, TWO_DECIMAL)
 
     print("Delta N after substracting CaNO3:", updated_delta_nitrogen, "mg")
 
@@ -185,12 +186,15 @@ if  added_N_with_KNO3 > updated_delta_nitrogen:
     updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_KNO3, TWO_DECIMAL) # N required - NNO3
     print("Delta N after substracting KNO3:", updated_delta_nitrogen, "mg")
     reduced_K = round(updated_delta_nitrogen * potassium_nitrate_KNNO3, TWO_DECIMAL) # to know how much K is added with N from previous step
-    print("K required to be reduced:", reduced_K, "mg")
+    print("K required to be reduced from Delta K:", reduced_K, "mg")
     updated_delta_potassium = round(updated_delta_potassium + reduced_K, TWO_DECIMAL)
-    print("\nK2SO4 injection since N required = N injected:", updated_delta_potassium, "mg")
+
+    print("\nK2SO4 injection choosen since N required = N injected:", updated_delta_potassium, "mg")
     k2SO4_ml = round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL)
     print("K2SO4 injection:", k2SO4_ml, "ml")
-
+    added_S_with_k2SO4 = round(ratio_calculation(updated_delta_potassium, potassium_sulphate_KSSO4), TWO_DECIMAL)
+    updated_delta_sulphur = round(updated_delta_sulphur - added_S_with_MgSO4, TWO_DECIMAL)
+    print("S in K2SO4:", added_S_with_k2SO4, "mg")
     """""
     TODO: add how much S is added as well but need MgSO4 ratio
     """""
@@ -205,7 +209,7 @@ else:
     added_N_with_Mg2NO3 = round(required_Mg * 1.17, TWO_DECIMAL) # 1.17 is the ratio of N-NO3/Mg
     updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_Mg2NO3, TWO_DECIMAL)
     mgNO3_ml = round((updated_delta_nitrogen/10000) * 1000, TWO_DECIMAL)
-    print("Mg required complete. Updated delta N =", updated_delta_nitrogen, "mg and solution to pump", mgNO3_ml, "ml")
+    print("Mg required complete with MG2NO3. Updated delta N =", updated_delta_nitrogen, "mg and solution to pump", mgNO3_ml, "ml")
     print("N in MG2NO3 =", added_N_with_Mg2NO3, "mg")
 
 
@@ -213,11 +217,11 @@ else:
 if  updated_delta_nitrogen < 0:
 
     # add MgSO4
-    print("Mg Dosing:", required_Mg, "mg")
+    print("\nMg Dosing:", required_Mg, "mg")
     added_S_with_MgSO4 = round(required_Mg * 1.32, TWO_DECIMAL) # 1.32 is the ratio of S-SO4/Mg
     updated_delta_sulphur = round(updated_delta_sulphur - added_S_with_MgSO4, TWO_DECIMAL)
     mgSO4_ml = round((updated_delta_sulphur/10000) * 1000, TWO_DECIMAL)
-    print("Mg required complete. Updated delta S =", updated_delta_sulphur, "mg and solution to pump", mgNO3_ml, "ml")
+    print("Mg required complete with MgSO4. Updated delta S =", updated_delta_sulphur, "mg and solution to pump", mgSO4_ml, "ml")
     print("\nS in MgSO4:", added_S_with_MgSO4, "mg")
 
 
@@ -226,20 +230,23 @@ else:
     ten_percent = round(0.10 * updated_delta_nitrogen, TWO_DECIMAL)
     forty_percent = round(0.40 * updated_delta_nitrogen, TWO_DECIMAL)
     fifty_percent = round(0.50 * updated_delta_nitrogen, TWO_DECIMAL)
-    print("\nMgNO3%, CaNO3%, KNO3% to be added to fulfill N req", ten_percent, "mg", forty_percent, "mg", fifty_percent, "mg\n") # to be checked
+    mgNO3_ml = round(mgNO3_ml + ((ten_percent/10000) * 1000), TWO_DECIMAL)
+    caNO3_ml = round(caNO3_ml + ((forty_percent/10000) * 1000), TWO_DECIMAL)
+    kNO3_ml = round(kNO3_ml + ((fifty_percent/10000) * 1000), TWO_DECIMAL)
+    print("\nMgNO3%, CaNO3%, KNO3% to be added to fulfill N req", ten_percent + forty_percent + fifty_percent, "mg\n") # to be checked
 
 
 # Display the final amount of solution's injection
 print("\n*************************** FINAL INJECTION ***************************")
 print("CaNO3 injection:", caNO3_ml, "ml")
 print("MKP injection:", mKP_ml, "ml")
+print("KNO3 injection:", kNO3_ml, "ml")
 print("MgNO3 injection:", mgNO3_ml, "ml")
 print("K2SO4 injection:", k2SO4_ml, "ml")
 print("MgSO4 injection:", mgSO4_ml, "ml")
-print("KNO3 injection:", kNO3_ml, "ml")
 print("NO3H38% for pH injection:", percentage_no3h38, "ml\n")
 iron_ml = round((micro_nuterients(0.0011)/10000) * 1000, TWO_DECIMAL)
 micro_ml = round((micro_nuterients(0.0032)/10000) * 1000, TWO_DECIMAL)
 print("Micro nutrient injection:", micro_ml, "ml")
 print("Iron nutrient injection:", iron_ml, "ml\n")
-print("Top up volume water:", round(volume_NS() , TWO_DECIMAL), "liters\n")
+print("Top up volume water:", round(volume_NS()/1000, TWO_DECIMAL), "liters\n")
