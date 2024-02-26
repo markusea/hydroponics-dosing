@@ -64,6 +64,7 @@ added_N_with_CaNO3 = 0
 added_K_with_MKP = 0
 added_K_with_K2SO4 = 0
 added_S_with_MgSO4 = 0
+added_S_with_k2SO4 = 0
 
 #  values for specific nutrients in ml
 mKP_ml =  0
