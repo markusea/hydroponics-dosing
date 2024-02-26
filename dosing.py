@@ -1,6 +1,7 @@
 # Define variables volumes
 vol_target = 10
 vol_current = 8
+vol_no3_38 = 5
 
 # Define variables for PPM values
 nitrogen_ppm = 203
@@ -20,8 +21,8 @@ mg_nitrate_NNO3Mg = 1.11
 potassium_sulphate_KSSO4 = 2.26
 
 # Define variables for measured PPM values Dummy Values
-nitrogen_measured_ppm = 225 #203
-potassium_measured_ppm = 310 #196
+nitrogen_measured_ppm = 203 #203
+potassium_measured_ppm = 196 #196
 calcium_measured_ppm = 200
 sulphur_measured_ppm = 50
 
@@ -93,15 +94,13 @@ caNO3_ml = 0
 kNO3_ml = 0
 mgNO3_ml = 0
 k2SO4_ml = 0
+mgSO4_ml= 0
 
 print("Delta Nitrogen:", initial_delta_nitrogen, "mg")
 print("Delta Calcium:", initial_delta_calcium, "mg")
 print("Delta Potassium:", initial_delta_potassium, "mg")
 print("Delta Sulphur:", initial_delta_sulphur, "mg\n")
-# print("Nitrogen injection ml:", delta_nitrogen_ml, "ml")
-# print("Calcium injection ml:", delta_calcium_ml, "ml")
-# print("Potassium injection ml:", delta_potassium_ml, "ml")
-# print("Sulphur injection ml:", delta_sulphur_ml, "ml\n")
+
 print("NO3H38%:", percentage_no3h38, "ml")
 print("N in NO3H38%:", percentage_no3h38 * 84, "mg")
 updated_delta_nitrogen = round(initial_delta_nitrogen - percentage_no3h38 * 84, TWO_DECIMAL)
@@ -117,9 +116,15 @@ def ratio_calculation(delta, ratio):
     specific_ion_part = delta/ratio
     return specific_ion_part
 
-# Function to calculate micro nutrients
+# Function to calculate micro nutrients TODO implementation
 def micro_nuterients(ratio):
     micro_concentration = ratio/(initial_delta_nitrogen + initial_delta_calcium + initial_delta_potassium)
+    return micro_concentration
+
+# Function to calculate nuterient solution TODO implementation
+def volume_NS():
+    water_volume = vol_target - (vol_current + 123 + vol_no3_38)
+    return water_volume 
 
 # Finding P and Mg required here
 required_P = round(mg_p_dosing(phosphor_ppm), TWO_DECIMAL)
@@ -135,12 +140,13 @@ required_Mg = round(mg_p_dosing(magni_ppm), TWO_DECIMAL)
 if initial_delta_calcium > 0:
     caNO3_ml = round((initial_delta_calcium/10000) * 1000, TWO_DECIMAL)
     print("\nTo be added CaNO3:", initial_delta_calcium, "mg and solution to pump", caNO3_ml, "ml")
+
     added_N_with_CaNO3 = round(ratio_calculation(initial_delta_calcium, calcium_nitrate_Ca_NNo3), TWO_DECIMAL)
-    # print("Add MKP/KH2PO4:", round(ratio_calculation(updated_delta_potassium, mkp_KPPO4), TWO_DECIMAL), "ml")
     mKP_ml = round((added_K_with_MKP/10000) * 1000, TWO_DECIMAL)
     print("\nP Dosing:", required_P, "mg")
     print("To be added MKP/KH2PO4:", added_K_with_MKP, "mg and solution to pump", mKP_ml, "ml")
     updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_CaNO3, TWO_DECIMAL)
+
     print("Delta N after substracting CaNO3:", updated_delta_nitrogen, "mg")
 else:
     print("Sufficient Ca levels")
@@ -150,11 +156,10 @@ else:
 if initial_delta_potassium > added_K_with_MKP:
     kNO3_ml = round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL)
     print("\nTo be added KNO3:", updated_delta_potassium, "mg and solution to pump", kNO3_ml, "ml")
+
     # calculte added ratio of N
     added_N_with_KNO3 = round(ratio_calculation(updated_delta_potassium,potassium_nitrate_KNNO3), TWO_DECIMAL)
     print("N in KNO3:", added_N_with_KNO3, "mg")
-    # updated_delta_nitrogen = updated_delta_nitrogen - added_N_with_KNO3
-    # print("delta N with KNO3:", updated_delta_nitrogen)
 
 else:
     added_N_with_Mg2NO3 = round(required_Mg * 1.17, TWO_DECIMAL)
@@ -205,3 +210,13 @@ else:
     forty_percent = round(0.40 * updated_delta_nitrogen, TWO_DECIMAL)
     fifty_percent = round(0.50 * updated_delta_nitrogen, TWO_DECIMAL)
     print("\nMgNO3%, CaNO3%, KNO3% to be added to fulfill N req", ten_percent, "mg", forty_percent, "mg", fifty_percent, "mg\n") # to be checked
+
+
+# Display the final amount of solution's injection
+print("\n*************************** FINAL INJECTION ***************************")
+print("CaNO3 injection:", caNO3_ml, "ml")
+print("MKP injection:", mKP_ml, "ml")
+print("MgNO3 injection:", mgNO3_ml, "ml")
+print("K2SO4 injection:", k2SO4_ml, "ml")
+print("MgSO4 injection:", mgSO4_ml, "ml")
+print("KNO3 injection:", kNO3_ml, "ml\n")
