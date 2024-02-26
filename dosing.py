@@ -130,7 +130,7 @@ def micro_nuterients(ratio):
 
 # Function to calculate nuterient solution implementation
 def volume_NS():
-    water_volume = (vol_target * 1000) - ((vol_current * 1000) + (mKP_ml + caNO3_ml + kNO3_ml + mgNO3_ml + k2SO4_ml + mgSO4_ml + iron_ml + micro_ml) + percentage_no3h38) # TODO add irom ml and micro ml as well
+    water_volume = (vol_target * 1000) - ((vol_current * 1000) + (mKP_ml + caNO3_ml + kNO3_ml + mgNO3_ml + k2SO4_ml + mgSO4_ml + iron_ml + micro_ml) + percentage_no3h38)
     return water_volume 
 
 # Finding P and Mg required here
