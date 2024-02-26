@@ -152,7 +152,7 @@ if initial_delta_calcium > 0:
     print("N in CaNO3:", added_N_with_CaNO3, "mg")
 
     print("\nP Dosing:", required_P, "mg")
-    mKP_ml = round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL)
+    mKP_ml = round((added_K_with_MKP/10000) * 1000, TWO_DECIMAL)
     print("To be added MKP/KH2PO4:", added_K_with_MKP, "mg and solution to pump", mKP_ml, "ml")
 
     print("Delta N after substracting CaNO3:", updated_delta_nitrogen, "mg")
@@ -189,7 +189,7 @@ if  added_N_with_KNO3 > updated_delta_nitrogen:
     print("K required to be reduced from Delta K:", reduced_K, "mg")
     updated_delta_potassium = round(updated_delta_potassium + reduced_K, TWO_DECIMAL)
 
-    print("\nK2SO4 injection choosen since N required = N injected:", updated_delta_potassium, "mg")
+    print("\nK2SO4 injection choosen to cover K since N required = N injected:", updated_delta_potassium, "mg")
     k2SO4_ml = round((updated_delta_potassium/10000) * 1000, TWO_DECIMAL)
     print("K2SO4 injection:", k2SO4_ml, "ml")
     added_S_with_k2SO4 = round(ratio_calculation(updated_delta_potassium, potassium_sulphate_KSSO4), TWO_DECIMAL)
@@ -208,7 +208,7 @@ else:
     print("Mg Dosing:", required_Mg, "mg")
     added_N_with_Mg2NO3 = round(required_Mg * 1.17, TWO_DECIMAL) # 1.17 is the ratio of N-NO3/Mg
     updated_delta_nitrogen = round(updated_delta_nitrogen - added_N_with_Mg2NO3, TWO_DECIMAL)
-    mgNO3_ml = round((updated_delta_nitrogen/10000) * 1000, TWO_DECIMAL)
+    mgNO3_ml = round((added_N_with_Mg2NO3/10000) * 1000, TWO_DECIMAL)
     print("Mg required complete with MG2NO3. Updated delta N =", updated_delta_nitrogen, "mg and solution to pump", mgNO3_ml, "ml")
     print("N in MG2NO3 =", added_N_with_Mg2NO3, "mg")
 
@@ -220,9 +220,9 @@ if  updated_delta_nitrogen < 0:
     print("\nMg Dosing:", required_Mg, "mg")
     added_S_with_MgSO4 = round(required_Mg * 1.32, TWO_DECIMAL) # 1.32 is the ratio of S-SO4/Mg
     updated_delta_sulphur = round(updated_delta_sulphur - added_S_with_MgSO4, TWO_DECIMAL)
-    mgSO4_ml = round((updated_delta_sulphur/10000) * 1000, TWO_DECIMAL)
+    mgSO4_ml = round((added_S_with_MgSO4/10000) * 1000, TWO_DECIMAL)
     print("Mg required complete with MgSO4. Updated delta S =", updated_delta_sulphur, "mg and solution to pump", mgSO4_ml, "ml")
-    print("\nS in MgSO4:", added_S_with_MgSO4, "mg")
+    print("S in MgSO4:", added_S_with_MgSO4, "mg")
 
 
 else:
